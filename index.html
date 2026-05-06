@@ -228,7 +228,7 @@ textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-
     <h3>管理员登录</h3>
     <p>输入密码后可新增 / 删除美食和区域，以及修改名称。<br>普通访客无需登录，可正常打卡和写评论。</p>
     <div class="pw-wrap">
-      <input class="pw-inp" id="pwInp" type="password" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="pw-inp" id="pwInp" type="password" placeholder="说出暗号" onkeydown="if(event.key==='Enter')doLogin()">
       <button class="pw-eye" onclick="togglePw()" id="pwEye">👁</button>
     </div>
     <div class="pw-err" id="pwErr"></div>
@@ -367,16 +367,16 @@ const BASE_AREAS = [
     { id:'nd4', name:'臊子面', note:'东门口，老式臊子面；小时候过年才会吃上的面，很有泸州特点' },
     { id:'nd5', name:'晓林臊子面', note:'新民街，老式臊子面' },
     { id:'nd6', name:'风口面', note:'干豆汤面、牛肉面、豇豆面' },
-    { id:'nd7', name:'叙永豆汤面', note:'' },
+    { id:'nd7', name:'叙永豆汤面', note:'名字是这个的店子有很多，味道应该都不会特别差吧，可以试试干的，试试汤的' },
   ]},
   { id:'yg', name:'鱼馆', icon:'🐟', items:[
     { id:'yg1', name:'雅名轩生态鱼府', note:'' },
     { id:'yg2', name:'渔舟渡精品鱼餐', note:'' },
-    { id:'yg3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来' },
+    { id:'yg3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来；这里也有葱葱鲫鱼' },
     { id:'yg4', name:'三三鱼馆', note:'' },
   ]},
   { id:'qt', name:'其他', icon:'📍', items:[
-    { id:'qt1', name:'建工兔 / 建工别院', note:'很有特色的兔子！！让我爱上了兔子' },
+    { id:'qt1', name:'建工兔 / 建工别院', note:'很有特色的兔子！！让我爱上了兔子，回家第一顿往往是这个' },
   ]},
 ];
 
