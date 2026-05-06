@@ -107,6 +107,8 @@ body.admin-mode .fc:hover .del-item-btn{opacity:1}
 textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-radius:7px;padding:8px 11px;resize:vertical;min-height:52px;line-height:1.65;outline:none;transition:border-color .15s}
 .ta-note{background:var(--card);border:1px solid var(--amber-border);color:var(--text)}
 .ta-note:focus{border-color:var(--amber)}
+.ta-note[readonly]{background:var(--bg);border-color:var(--border);color:var(--muted);cursor:default;resize:none;opacity:.85}
+.ta-note[readonly]:focus{border-color:var(--border)}
 .ta-cmt{background:var(--cmt-bg);border:1px solid var(--cmt-border);color:var(--cmt)}
 .ta-cmt:focus{border-color:var(--cmt)}
 .save-hint{font-size:10px;color:var(--hint);text-align:right}
@@ -419,6 +421,7 @@ function doLogin(){
     document.getElementById('adminBtn').classList.add('active');
     document.getElementById('adminBtn').textContent='🔓 退出管理';
     document.getElementById('adminTag').classList.add('show');
+    document.querySelectorAll('.ta-note').forEach(t=>{t.removeAttribute('readonly');t.placeholder='添加备注…';});
     closeLogin();
   }else{
     inp.classList.add('err');
@@ -434,6 +437,7 @@ function logoutAdmin(){
   document.getElementById('adminBtn').classList.remove('active');
   document.getElementById('adminBtn').textContent='🔑 管理';
   document.getElementById('adminTag').classList.remove('show');
+  document.querySelectorAll('.ta-note').forEach(t=>{t.setAttribute('readonly','');t.placeholder='备注（仅管理员可编辑）';});
 }
 document.getElementById('loginModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogin();});
 
@@ -475,7 +479,7 @@ function renderCard(item,areaId){
   <div class="fc-detail" id="det_${item.id}">
     <div class="dl">
       <span class="dl-tag"><span class="tag tag-note">📝 备注</span></span>
-      <textarea class="ta-note" rows="2" placeholder="添加备注…" oninput="sf('${item.id}','note',this.value)">${h(note)}</textarea>
+      <textarea class="ta-note" rows="2" placeholder="备注（仅管理员可编辑）" id="ta_note_${item.id}" readonly oninput="sf('${item.id}','note',this.value)">${h(note)}</textarea>
     </div>
     <div class="dl">
       <span class="dl-tag"><span class="tag tag-cmt">💬 评论</span></span>
