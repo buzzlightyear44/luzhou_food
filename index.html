@@ -194,12 +194,12 @@ textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-
 </head>
 <body>
 
-<div class="watermark">by gxt</div>
+<div class="watermark">by 没有啊</div>
 
 <div class="hdr">
   <div class="hdr-top">
     <div class="brand">
-      <h1>泸州美食打卡地图 <span class="sub">by gxt</span></h1>
+      <h1>泸州美食打卡地图 <span class="sub">by 没有啊</span></h1>
       <p>点击卡片打卡 · 展开后可以写评论 · 数据保存在你自己的设备上</p>
     </div>
     <div class="prog-wrap">
@@ -252,10 +252,8 @@ textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-
 </div>
 
 <script>
-// ════════════════════════════════════════
-// !! 在这里修改管理员密码 !!
-const ADMIN_PASSWORD = 'gxt2024';
-// ════════════════════════════════════════
+const ADMIN_PASSWORD = 'woailuzhou';
+
 
 const BASE_AREAS = [
   { id:'xx', name:'肖巷子', icon:'🍡', items:[
@@ -265,7 +263,7 @@ const BASE_AREAS = [
     { id:'xx4', name:'蜘蛛粑', note:'之前在面对这三家的右手方再走一段，现在不知道还开不开' },
     { id:'xx5', name:'鲁老八串串', note:'冷串串和炸串都记到吃；冷串串喜欢酸辣，炸串喜欢辣椒面；推荐豆腐皮和豆腐鱼，豆腐鱼是用白菜卷萝卜丝做的' },
     { id:'xx6', name:'唇齿留香', note:'炸香蕉，和鲁老八挨着；炸香蕉配番茄酱，其他炸物配辣椒面，番茄酱是老板自制的；开门佛系，有个暑假连去几次都没开' },
-    { id:'xx7', name:'佬妈蹄花', note:'白汤耙蹄花，软软糯糯，老店；唯一一个爸爸同意点外卖的东西，经常给爷爷点' },
+    { id:'xx7', name:'佬妈蹄花', note:'白汤耙蹄花，软软糯糯，老店' },
     { id:'xx8', name:'市府路老式凉糕 · 冰粉 · 凉虾', note:'在公交车路牌背后，夹在鸭鸭和恒源祥中间的巷子里' },
   ]},
   { id:'sjg', name:'水井沟摩尔旁边', icon:'🫓', items:[
@@ -308,7 +306,7 @@ const BASE_AREAS = [
   { id:'gj', name:'国窖大桥 · 滨江路', icon:'🍖', items:[
     { id:'gj1', name:'老字号锅锅宴', note:'搬家了，要搜一哈具体位置；最开始食贫道做美食视频发过，可以看看' },
     { id:'gj2', name:'喷火龙西昌烧烤', note:'纯肉食动物，自己围着火炉烤' },
-    { id:'gj3', name:'李庄白肉', note:'要吃老店！桥下面那个' },
+    { id:'gj3', name:'李庄白肉', note:'要吃老店！桥下面那个，李庄白肉肯定得点一份' },
   ]},
   { id:'zgl', name:'钟鼓楼', icon:'🏮', items:[
     { id:'zgl1', name:'饶氏豆腐鱼', note:'很薄的面皮包各种素菜，小小一个' },
@@ -326,8 +324,8 @@ const BASE_AREAS = [
     { id:'wx4', name:'佘家豆花', note:'黑豆花、白油几哈豆花' },
     { id:'wx5', name:'李氏酱肉饼', note:'夜市摊，欢乐汇对面' },
     { id:'wx6', name:'钟跷脚', note:'喜欢番茄锅底，牛肉汤锅' },
-    { id:'wx7', name:'蜀黄全牛宴', note:'' },
-    { id:'wx8', name:'大贰火锅', note:'可以预定窗边，记得点蛋炒饭和泡菜' },
+    { id:'wx7', name:'蜀黄全牛宴', note:'很嫩的排酸牛肉，中间是汤锅周围围了一圈烤盘，有菌汤锅、番茄锅、辣锅，不能吃辣的人友好' },
+    { id:'wx8', name:'大贰火锅', note:'可以预定窗边，记得点蛋炒饭和跳水泡菜' },
     { id:'wx9', name:'老邓凉糕', note:'凉虾、凉糕，有翻砂红糖；可以吃别的东西的时候带一碗' },
     { id:'wx10', name:'江阳夜宵', note:'个人经常吃觉得还可以的烧烤；隔壁家专门做烤鱼的是烤得焦焦的那种，看个人喜好' },
     { id:'wx11', name:'酒签巷', note:'集合了那一片店家，在这家可以下单其他家的食物，融合菜馆；豆花火锅、烧烤、锅锅宴、炒菜周边店有的这里都有' },
@@ -425,7 +423,7 @@ function doLogin(){
     closeLogin();
   }else{
     inp.classList.add('err');
-    err.textContent='密码不正确，请重试';
+    err.textContent='鸡哔你biubiu';
     inp.value='';
     inp.focus();
     setTimeout(()=>inp.classList.remove('err'),600);
