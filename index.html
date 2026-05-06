@@ -5,7 +5,1345 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>泸州美食打卡地图</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style><!DOCTYPE html>
+<html lang="zh-CN"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泸州美食打卡地图</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FBF5EE;--card:#FFFCF7;--border:#E4D4BF;--border-soft:#F0E5D6;
+  --text:#2A1708;--muted:#896D58;--hint:#BBA898;
+  --accent:#C0461F;--accent-light:#FAECE4;
+  --tried:#3D7035;
+  --cmt:#1756A0;--cmt-bg:#E6F0FB;--cmt-border:#B3CFEE;
+  --amber:#A8601A;--amber-bg:#FEF3E0;--amber-border:#ECC07A;
+  --danger:#B83215;
+  --admin:#7B3278;--admin-bg:#F5EAF4;--admin-border:#D9AEDD;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+
+/* ── WATERMARK ── */
+.watermark{position:fixed;bottom:22px;right:22px;z-index:999;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:500;color:rgba(192,70,31,.22);letter-spacing:.12em;pointer-events:none;user-select:none}
+
+/* ── HEADER ── */
+.hdr{background:var(--card);border-bottom:1.5px solid var(--border);padding:18px 24px 14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(42,23,8,.06)}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.brand h1{font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:.06em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brand h1 .sub{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.06em;font-family:'Noto Sans SC',sans-serif}
+.brand p{font-size:11px;color:var(--muted);margin-top:4px}
+.prog-wrap{text-align:right}
+.prog-num{font-size:26px;font-weight:500;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.prog-label{font-size:11px;color:var(--muted);margin-top:2px}
+.prog-bar-bg{width:150px;height:5px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;margin-left:auto}
+.prog-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.ctrl{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.fbtn{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 15px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .15s}
+.fbtn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.srch{border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;padding:5px 14px;border-radius:999px;font-family:inherit;outline:none;width:160px;transition:border-color .15s}
+.srch:focus{border-color:var(--accent)}
+.srch::placeholder{color:var(--hint)}
+
+/* ── ADMIN BADGE ── */
+.admin-btn{background:none;border:1px solid var(--admin-border);color:var(--admin);font-size:12px;padding:5px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.admin-btn:hover{background:var(--admin-bg)}
+.admin-btn.active{background:var(--admin);color:#fff;border-color:var(--admin)}
+.admin-tag{display:none;background:var(--admin-bg);border:1px solid var(--admin-border);color:var(--admin);font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500;letter-spacing:.02em;align-items:center;gap:4px}
+.admin-tag.show{display:inline-flex}
+
+/* ── MAIN ── */
+.main{max-width:1000px;margin:0 auto;padding:28px 16px 120px}
+.area{margin-bottom:38px}
+.area.no-vis{display:none}
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+
+/* ── AREA HEADER ── */
+.area-hdr{display:flex;align-items:center;gap:10px;margin-bottom:13px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.area-icon{font-size:19px;line-height:1;flex-shrink:0}
+.area-title-wrap{display:flex;align-items:center;gap:5px;flex:1;min-width:0}
+.area-title{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:.04em}
+.edit-title-inp{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--text);border:none;border-bottom:2px solid var(--accent);background:transparent;outline:none;padding:0 2px;width:100%;max-width:300px;letter-spacing:.04em;display:none}
+/* admin-only UI elements hidden by default */
+.admin-only{display:none!important}
+body.admin-mode .admin-only{display:inline-flex!important}
+body.admin-mode .admin-only.block{display:flex!important}
+body.admin-mode .admin-only.grid-item{display:block!important}
+.edit-icon{font-size:12px;color:var(--hint);cursor:pointer;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;background:none;border:none;line-height:1}
+body.admin-mode .area-hdr:hover .edit-icon{opacity:1}
+body.admin-mode .fc:hover .edit-name-icon{opacity:1}
+.edit-icon:hover{color:var(--accent)}
+.area-stat{font-size:11px;color:var(--muted);background:var(--border-soft);padding:3px 11px;border-radius:999px;flex-shrink:0;margin-left:auto}
+.del-area-btn{font-size:11px;color:var(--hint);padding:3px 10px;border:1px solid var(--border);border-radius:999px;background:none;cursor:pointer;font-family:inherit;margin-left:6px;transition:all .15s;flex-shrink:0}
+.del-area-btn:hover{color:var(--danger);border-color:var(--danger)}
+
+/* ── FOOD CARD ── */
+.fc{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.fc:hover{box-shadow:0 4px 16px rgba(192,70,31,.11)}
+.fc.hidden{display:none}
+.fc-main{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 10px;cursor:pointer;user-select:none}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;margin-top:2px;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.fc.tried .chk{background:var(--tried);border-color:var(--tried);color:#fff}
+.fc-info{flex:1;min-width:0}
+.fc-name-wrap{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}
+.fc-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;flex:1;min-width:0}
+.fc.tried .fc-name{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--hint)}
+.edit-name-inp{font-size:14px;font-weight:500;color:var(--text);border:none;border-bottom:1.5px solid var(--accent);background:transparent;outline:none;padding:0 2px;width:100%;display:none;line-height:1.45;font-family:inherit}
+.edit-name-icon{font-size:11px;color:var(--hint);cursor:pointer;padding:1px 3px;border-radius:3px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;background:none;border:none;line-height:1}
+.edit-name-icon:hover{color:var(--accent)}
+.fc-note-short{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
+.fc-btns{display:flex;gap:1px;align-items:flex-start;margin-top:1px;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--hint);font-size:13px;padding:2px 5px;transition:transform .2s,color .15s;line-height:1}
+.icon-btn:hover{color:var(--accent)}
+.icon-btn.open{transform:rotate(180deg);color:var(--accent)}
+.del-item-btn{background:none;border:none;cursor:pointer;color:var(--hint);font-size:13px;padding:2px 5px;line-height:1;transition:color .15s,opacity .15s;opacity:0}
+body.admin-mode .fc:hover .del-item-btn{opacity:1}
+.del-item-btn:hover{color:var(--danger)}
+
+/* ── DETAIL PANEL ── */
+.fc-detail{display:none;border-top:1px solid var(--border-soft);padding:12px 14px;background:var(--bg);gap:10px;flex-direction:column}
+.fc-detail.open{display:flex}
+.dl{display:flex;flex-direction:column;gap:5px}
+.dl-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--muted)}
+.tag{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500;letter-spacing:.02em}
+.tag-note{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.tag-cmt{background:var(--cmt-bg);color:var(--cmt);border:1px solid var(--cmt-border)}
+textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-radius:7px;padding:8px 11px;resize:vertical;min-height:52px;line-height:1.65;outline:none;transition:border-color .15s}
+.ta-note{background:var(--card);border:1px solid var(--amber-border);color:var(--text)}
+.ta-note:focus{border-color:var(--amber)}
+.ta-cmt{background:var(--cmt-bg);border:1px solid var(--cmt-border);color:var(--cmt)}
+.ta-cmt:focus{border-color:var(--cmt)}
+.save-hint{font-size:10px;color:var(--hint);text-align:right}
+
+/* ── ADD FOOD CARD (admin only) ── */
+.add-fc{border:1.5px dashed var(--border);border-radius:10px;overflow:hidden;background:transparent;transition:border-color .15s,background .15s}
+.add-fc:hover{border-color:var(--accent);background:var(--accent-light)}
+.add-fc-btn{display:flex;align-items:center;gap:8px;padding:13px 14px;cursor:pointer;width:100%;background:none;border:none;font-family:inherit;color:var(--hint);font-size:13px;transition:color .15s}
+.add-fc:hover .add-fc-btn{color:var(--accent)}
+.plus-circle{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex-shrink:0}
+.add-fc-form{display:none;padding:12px 14px;border-top:1px solid var(--border-soft);background:var(--bg);gap:8px;flex-direction:column}
+.add-fc-form.open{display:flex}
+.add-inp{border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;padding:8px 12px;border-radius:7px;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+.add-inp:focus{border-color:var(--accent)}
+.add-inp::placeholder{color:var(--hint)}
+.add-inp.err{border-color:var(--danger)}
+.btn-row{display:flex;gap:8px}
+.btn-ok{background:var(--accent);border:none;color:#fff;font-size:12px;padding:7px 18px;border-radius:7px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-ok:hover{opacity:.85}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-cancel:hover{border-color:var(--muted)}
+
+/* ── ADD AREA (admin only) ── */
+.add-area-wrap{margin-bottom:36px}
+.add-area-trigger{display:flex;align-items:center;gap:10px;padding:14px 18px;border:1.5px dashed var(--border);border-radius:12px;cursor:pointer;width:100%;background:none;font-family:inherit;color:var(--hint);font-size:13px;transition:all .15s}
+.add-area-trigger:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.add-area-form{display:none;border:1.5px solid var(--border);border-radius:12px;padding:16px;background:var(--card);gap:12px;flex-direction:column}
+.add-area-form.open{display:flex}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px}
+.emoji-btn{font-size:18px;padding:6px 8px;border-radius:7px;cursor:pointer;border:1.5px solid transparent;line-height:1;transition:all .15s;background:none}
+.emoji-btn:hover{background:var(--accent-light);border-color:var(--accent)}
+.emoji-btn.sel{background:var(--accent-light);border-color:var(--accent)}
+
+/* ── ADMIN LOGIN MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(42,23,8,.45);z-index:600;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:28px 24px;max-width:340px;width:92%;text-align:center}
+.modal-icon{font-size:32px;margin-bottom:12px}
+.modal h3{font-family:'Noto Serif SC',serif;font-size:17px;color:var(--text);margin-bottom:6px}
+.modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.65}
+.pw-wrap{position:relative;margin-bottom:6px}
+.pw-inp{border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;padding:10px 40px 10px 14px;border-radius:9px;font-family:inherit;outline:none;transition:border-color .15s;width:100%;letter-spacing:.1em}
+.pw-inp:focus{border-color:var(--admin)}
+.pw-inp.err{border-color:var(--danger);animation:shake .25s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--hint);font-size:15px;line-height:1}
+.pw-err{font-size:11px;color:var(--danger);margin-bottom:12px;min-height:16px;text-align:left}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.btn-login{background:var(--admin);border:none;color:#fff;font-size:13px;padding:9px 28px;border-radius:8px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-login:hover{opacity:.85}
+.btn-close-modal{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:9px 18px;border-radius:8px;cursor:pointer;font-family:inherit}
+
+/* ── DIALOG ── */
+.dlg-bg{position:fixed;inset:0;background:rgba(42,23,8,.4);z-index:500;align-items:center;justify-content:center;display:none}
+.dlg-bg.show{display:flex}
+.dlg{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:24px 20px;max-width:320px;width:90%;text-align:center}
+.dlg h3{font-family:'Noto Serif SC',serif;font-size:16px;color:var(--text);margin-bottom:8px}
+.dlg p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:20px}
+.dlg-btns{display:flex;gap:10px;justify-content:center}
+.dlg-ok{background:var(--danger);border:none;color:#fff;font-size:13px;padding:8px 22px;border-radius:8px;cursor:pointer;font-family:inherit}
+.dlg-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit}
+
+.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;display:none}
+.empty-msg.show{display:block}
+
+@media(max-width:600px){
+  .food-grid{grid-template-columns:1fr}
+  .hdr{padding:14px 14px 12px}
+  .main{padding:20px 10px 100px}
+  .srch{width:120px}
+  .prog-bar-bg{width:100px}
+  body.admin-mode .del-item-btn{opacity:1}
+  body.admin-mode .edit-icon{opacity:1}
+  body.admin-mode .edit-name-icon{opacity:1}
+}
+@media print{
+  .hdr,.watermark{position:static}
+  .ctrl,.fc-btns,.add-fc,.add-area-wrap,.del-area-btn,.edit-icon,.edit-name-icon,.admin-btn,.admin-tag{display:none!important}
+  .fc-detail{display:flex!important}
+}
+</style>
+</head>
+<body>
+
+<div class="watermark">by gxt</div>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="brand">
+      <h1>泸州美食打卡地图 <span class="sub">by gxt</span></h1>
+      <p>点击卡片打卡 · 展开后可以写评论 · 数据保存在你自己的设备上</p>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-num" id="pn">0 / 0</div>
+      <div class="prog-label">已打卡</div>
+      <div class="prog-bar-bg"><div class="prog-bar" id="pb"></div></div>
+    </div>
+  </div>
+  <div class="ctrl">
+    <button class="fbtn on" onclick="setFilter('all',this)">全部</button>
+    <button class="fbtn" onclick="setFilter('tried',this)">已打卡 ✓</button>
+    <button class="fbtn" onclick="setFilter('untried',this)">未打卡</button>
+    <input class="srch" type="text" placeholder="搜索美食名称…" oninput="doSearch(this.value)">
+    <span class="admin-tag" id="adminTag">🔑 管理员模式</span>
+    <button class="admin-btn" id="adminBtn" onclick="handleAdminBtn()">🔑 管理</button>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="empty-msg" id="emptyMsg">没有找到匹配的美食 🍜</div>
+
+<!-- 管理员登录弹窗 -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <div class="modal-icon">🔑</div>
+    <h3>管理员登录</h3>
+    <p>输入密码后可新增 / 删除美食和区域，以及修改名称。<br>普通访客无需登录，可正常打卡和写评论。</p>
+    <div class="pw-wrap">
+      <input class="pw-inp" id="pwInp" type="password" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="pw-eye" onclick="togglePw()" id="pwEye">👁</button>
+    </div>
+    <div class="pw-err" id="pwErr"></div>
+    <div class="modal-btns">
+      <button class="btn-close-modal" onclick="closeLogin()">取消</button>
+      <button class="btn-login" onclick="doLogin()">确认登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认删除弹窗 -->
+<div class="dlg-bg" id="dlgBg">
+  <div class="dlg">
+    <h3>确认删除</h3>
+    <p id="dlgMsg"></p>
+    <div class="dlg-btns">
+      <button class="dlg-cancel" onclick="closeDlg()">取消</button>
+      <button class="dlg-ok" onclick="confirmDel()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// !! 在这里修改管理员密码 !!
+const ADMIN_PASSWORD = 'gxt2024';
+// ════════════════════════════════════════
+
+const BASE_AREAS = [
+  { id:'xx', name:'肖巷子', icon:'🍡', items:[
+    { id:'xx1', name:'泸州白糕', note:'一般会点白糕，有时候点个牛肉面，吃个凉糕' },
+    { id:'xx2', name:'红桥猪儿粑', note:'带朋友去吃这三家，每样只准点一个，都是碳水，怕吃不下别的；通常点个猪儿粑' },
+    { id:'xx3', name:'豆腐脑', note:'以上三家店挨在一起；一般点原味和牛肉味，这里有浑水粑也是泸州小吃；更喜欢东门口滨江路挑担子卖的豆腐脑，感觉最代表小时候的记忆' },
+    { id:'xx4', name:'蜘蛛粑', note:'之前在面对这三家的右手方再走一段，现在不知道还开不开' },
+    { id:'xx5', name:'鲁老八串串', note:'冷串串和炸串都记到吃；冷串串喜欢酸辣，炸串喜欢辣椒面；推荐豆腐皮和豆腐鱼，豆腐鱼是用白菜卷萝卜丝做的' },
+    { id:'xx6', name:'唇齿留香', note:'炸香蕉，和鲁老八挨着；炸香蕉配番茄酱，其他炸物配辣椒面，番茄酱是老板自制的；开门佛系，有个暑假连去几次都没开' },
+    { id:'xx7', name:'佬妈蹄花', note:'白汤耙蹄花，软软糯糯，老店；唯一一个爸爸同意点外卖的东西，经常给爷爷点' },
+    { id:'xx8', name:'市府路老式凉糕 · 冰粉 · 凉虾', note:'在公交车路牌背后，夹在鸭鸭和恒源祥中间的巷子里' },
+  ]},
+  { id:'sjg', name:'水井沟摩尔旁边', icon:'🫓', items:[
+    { id:'sjg1', name:'牟记锅盔', note:'牛肉锅盔、猪肉锅盔' },
+    { id:'sjg2', name:'刘三姐烤串', note:'从路边小摊开成门店了' },
+    { id:'sjg3', name:'林黄粑', note:'可以当土特产带回去；可以煎、炸、烤；最常吃的是红糖原味' },
+    { id:'sjg4', name:'古蔺麻辣鸡', note:'可以当土特产带回去' },
+  ]},
+  { id:'zb', name:'重百美食一条街', icon:'🏪', items:[
+    { id:'zb1', name:'土豆花', note:'不是土豆坨坨！有家土豆坨坨也很火但个人觉得一般；吃土豆坨坨的话杜家街那家不错' },
+    { id:'zb2', name:'卷皮', note:'美食街进去右手边第4、5家小摊，在一家臭豆腐旁边，容易错过；喜欢点荤的酸辣' },
+    { id:'zb3', name:'软桃片', note:'软的桃片，在德克士楼下圣杰药业门口；10块钱起称，差不多十片左右' },
+    { id:'zb4', name:'鲁老大点点香', note:'和鲁老八味道差不多' },
+  ]},
+  { id:'cb', name:'城北中医院', icon:'🍜', items:[
+    { id:'cb1', name:'正宗云南烙烤', note:'金诺西门对门的街上；开了分店叫罗开心砂锅烙烤；喊老板推荐菜' },
+    { id:'cb2', name:'火焰山烧烤', note:'开了很久的烧烤店；烤乌鱼片比较有特点' },
+    { id:'cb3', name:'金诺门口一排面', note:'有竹笋牛肉面、眼镜面馆、叙永豆汤面等；米块必须吃！！豆汤要搞一哈，有干豆汤和汤的！！牛肉面很有特色！' },
+    { id:'cb4', name:'好口味麻辣鸡', note:'' },
+    { id:'cb5', name:'铺盖面', note:'在金诺西门对面；铺盖面就是那种一根面就可以遮住一个碗，很宽很大' },
+  ]},
+  { id:'kj', name:'酒城大道一段 · 空间爱晴苑 · 南阳花园附近', icon:'🌿', items:[
+    { id:'kj1', name:'彭搭搭面', note:'搭搭面' },
+    { id:'kj2', name:'三拾面馆', note:'有点小贵，但好吃；认真做面，每个面都是不同的味道和底味' },
+    { id:'kj3', name:'叙永豆汤面', note:'' },
+    { id:'kj4', name:'南阳小馆', note:'家常川菜馆子，生意很好' },
+    { id:'kj5', name:'十里香古蔺麻辣烫', note:'汤底很有特色，不是通常的红油' },
+    { id:'kj6', name:'张摊摊麻辣烫', note:'是连锁店，但个人还是挺喜欢吃' },
+    { id:'kj7', name:'罗汉小吃', note:'豆汤面，正宗叙永豆汤面，在泸州博物馆警校附近' },
+  ]},
+  { id:'yd', name:'伊顿饭店 · 麦当劳右边巷子', icon:'🥟', items:[
+    { id:'yd1', name:'左肥肠', note:'和泡菜抄手挨在一起；小时候泡菜抄手坐满了就去左肥肠点碗肥肠面，端碗泡菜抄手过来' },
+    { id:'yd2', name:'泡菜抄手', note:'蒜泥抄手' },
+  ]},
+  { id:'zzj', name:'珠子街 · 东门口 · 迎辉路', icon:'🌶️', items:[
+    { id:'zzj1', name:'臊子面', note:'东门口，老式臊子面；小时候过年才会吃上的面，很有泸州特点' },
+    { id:'zzj2', name:'王式酸辣粉', note:'一般点一个酸辣粉和一个八宝粥；八宝粥是老式的，汤和米分层，加了各种小料；小红书有相关帖子可以搜' },
+    { id:'zzj3', name:'蜀南人家', note:'家常川菜，好吃；喜欢铲铲排骨' },
+  ]},
+  { id:'gj', name:'国窖大桥 · 滨江路', icon:'🍖', items:[
+    { id:'gj1', name:'老字号锅锅宴', note:'搬家了，要搜一哈具体位置；最开始食贫道做美食视频发过，可以看看' },
+    { id:'gj2', name:'喷火龙西昌烧烤', note:'纯肉食动物，自己围着火炉烤' },
+    { id:'gj3', name:'李庄白肉', note:'要吃老店！桥下面那个' },
+  ]},
+  { id:'zgl', name:'钟鼓楼', icon:'🏮', items:[
+    { id:'zgl1', name:'饶氏豆腐鱼', note:'很薄的面皮包各种素菜，小小一个' },
+    { id:'zgl2', name:'黑糖刨冰', note:'老式刨冰，老店了' },
+  ]},
+  { id:'jyl', name:'佳裕路', icon:'☕', items:[
+    { id:'jyl1', name:'阿思寿司', note:'' },
+    { id:'jyl2', name:'猫叔咖啡', note:'' },
+    { id:'jyl3', name:'好菜馆', note:'家常川菜' },
+  ]},
+  { id:'wx', name:'万象汇 · 欢乐汇', icon:'🛍️', items:[
+    { id:'wx1', name:'翘口皮冷沾沾', note:'除了沾沾，他们的小吃也不错' },
+    { id:'wx2', name:'冯校长老火锅', note:'成都老排队的火锅，但个人觉得在泸州可以吃点别的店' },
+    { id:'wx3', name:'小郡肝钢管厂串串', note:'热锅串串，各种牛肉串' },
+    { id:'wx4', name:'佘家豆花', note:'黑豆花、白油几哈豆花' },
+    { id:'wx5', name:'李氏酱肉饼', note:'夜市摊，欢乐汇对面' },
+    { id:'wx6', name:'钟跷脚', note:'喜欢番茄锅底，牛肉汤锅' },
+    { id:'wx7', name:'蜀黄全牛宴', note:'' },
+    { id:'wx8', name:'大贰火锅', note:'可以预定窗边，记得点蛋炒饭和泡菜' },
+    { id:'wx9', name:'老邓凉糕', note:'凉虾、凉糕，有翻砂红糖；可以吃别的东西的时候带一碗' },
+    { id:'wx10', name:'江阳夜宵', note:'个人经常吃觉得还可以的烧烤；隔壁家专门做烤鱼的是烤得焦焦的那种，看个人喜好' },
+    { id:'wx11', name:'酒签巷', note:'集合了那一片店家，在这家可以下单其他家的食物，融合菜馆；豆花火锅、烧烤、锅锅宴、炒菜周边店有的这里都有' },
+  ]},
+  { id:'djj', name:'杜家街', icon:'🥔', items:[
+    { id:'djj1', name:'叙永土豆花', note:'推荐糖醋麻辣口味；土豆坨坨或狼牙土豆按个人喜好自选；他家凉面也不错' },
+    { id:'djj2', name:'健健烤串', note:'这家店对面有个甜品店，可以买个甜品去吃烧烤' },
+    { id:'djj3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来' },
+  ]},
+  { id:'smt', name:'上码头', icon:'⚓', items:[
+    { id:'smt1', name:'清真异味轩牛肉馆', note:'牛肉面' },
+    { id:'smt2', name:'罗氏面庄', note:'干杂面' },
+    { id:'smt3', name:'特色干杂面', note:'干杂面' },
+  ]},
+  { id:'xmj', name:'新民街', icon:'🍥', items:[
+    { id:'xmj1', name:'晓林臊子面', note:'老式臊子面' },
+  ]},
+  { id:'lh', name:'泸州高中', icon:'🏫', items:[
+    { id:'lh1', name:'风口面', note:'干豆汤面、牛肉面、豇豆面' },
+    { id:'lh2', name:'万顺砂锅米线', note:'三鲜米线、烫饭、炸串' },
+    { id:'lh3', name:'冒菜店', note:'后门巷子里的冒菜店' },
+  ]},
+  { id:'hg', name:'火锅', icon:'🍲', items:[
+    { id:'hg1', name:'黑豆花火锅', note:'张坝桂圆林门口' },
+    { id:'hg2', name:'钟跷脚', note:'选番茄锅底，牛肉汤锅' },
+    { id:'hg3', name:'蜀黄全牛宴', note:'很嫩的牛肉，连锁店' },
+    { id:'hg4', name:'大贰火锅', note:'可以预定窗边，风景不错；记得点蛋炒饭和泡菜' },
+    { id:'hg5', name:'麻辣空间', note:'泸州本地品牌，有很多家店；清油火锅，这个肯定要吃一顿；大锅一起吃，个别店有小锅一人一个' },
+  ]},
+  { id:'dh', name:'豆花店', icon:'🫘', items:[
+    { id:'dh1', name:'石磨豆花（醇香路店）', note:'点个白水豆花，配些家常炒菜' },
+    { id:'dh2', name:'紫檀阁（瑞丰公馆店）', note:'合江豆花，菜品种类少但经典；少有的打调料地方有绍子；老板装修很顶，有檀木展览' },
+    { id:'dh3', name:'佘家豆花（瑞丰公馆店）', note:'地点在万象汇附近；家常菜味道也不错；白水豆花、鸡哈豆花' },
+  ]},
+  { id:'nd', name:'面馆', icon:'🍝', items:[
+    { id:'nd1', name:'酱子酸菜面', note:'这家面可以双拼！味道也好' },
+    { id:'nd2', name:'罗汉小吃', note:'豆汤面，正宗叙永豆汤面，在泸州博物馆警校附近' },
+    { id:'nd3', name:'李记绍子面', note:'枫林街；臊子和绍子是不同的' },
+    { id:'nd4', name:'臊子面', note:'东门口，老式臊子面；小时候过年才会吃上的面，很有泸州特点' },
+    { id:'nd5', name:'晓林臊子面', note:'新民街，老式臊子面' },
+    { id:'nd6', name:'风口面', note:'干豆汤面、牛肉面、豇豆面' },
+    { id:'nd7', name:'叙永豆汤面', note:'' },
+  ]},
+  { id:'yg', name:'鱼馆', icon:'🐟', items:[
+    { id:'yg1', name:'雅名轩生态鱼府', note:'' },
+    { id:'yg2', name:'渔舟渡精品鱼餐', note:'' },
+    { id:'yg3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来' },
+    { id:'yg4', name:'三三鱼馆', note:'' },
+  ]},
+  { id:'qt', name:'其他', icon:'📍', items:[
+    { id:'qt1', name:'建工兔 / 建工别院', note:'很有特色的兔子！！让我爱上了兔子' },
+  ]},
+];
+
+const EMOJIS=['🍜','🍲','🥢','🍡','🥟','🍖','🫓','🌶️','🍣','☕','🛍️','🏫','🍝','🫘','📍','🌿','🏪','🍱','🎯','🌟','🍤','🫕','🥘','🍛','🍢','🐟','🏮','⚓','🥔','🍥'];
+
+const SK='lz_v5';
+let S={items:{},names:{},customItems:{},customAreas:[],deletedBase:{}};
+let isAdmin=false;
+
+function load(){try{S=JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){}S.items=S.items||{};S.names=S.names||{};S.customItems=S.customItems||{};S.customAreas=S.customAreas||[];S.deletedBase=S.deletedBase||{}}
+function save(){localStorage.setItem(SK,JSON.stringify(S))}
+function gi(id){if(!S.items[id])S.items[id]={tried:false,note:'',cmt:''};return S.items[id]}
+function gname(id,fb){return S.names[id]!==undefined?S.names[id]:fb}
+function h(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ── ADMIN AUTH ──
+function handleAdminBtn(){
+  if(isAdmin){logoutAdmin();}else{openLogin();}
+}
+function openLogin(){
+  document.getElementById('pwInp').value='';
+  document.getElementById('pwErr').textContent='';
+  document.getElementById('loginModal').classList.add('show');
+  setTimeout(()=>document.getElementById('pwInp').focus(),100);
+}
+function closeLogin(){document.getElementById('loginModal').classList.remove('show');}
+function togglePw(){
+  const inp=document.getElementById('pwInp');
+  const eye=document.getElementById('pwEye');
+  if(inp.type==='password'){inp.type='text';eye.textContent='🙈';}
+  else{inp.type='password';eye.textContent='👁';}
+}
+function doLogin(){
+  const val=document.getElementById('pwInp').value;
+  const inp=document.getElementById('pwInp');
+  const err=document.getElementById('pwErr');
+  if(val===ADMIN_PASSWORD){
+    isAdmin=true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('adminBtn').classList.add('active');
+    document.getElementById('adminBtn').textContent='🔓 退出管理';
+    document.getElementById('adminTag').classList.add('show');
+    closeLogin();
+  }else{
+    inp.classList.add('err');
+    err.textContent='密码不正确，请重试';
+    inp.value='';
+    inp.focus();
+    setTimeout(()=>inp.classList.remove('err'),600);
+  }
+}
+function logoutAdmin(){
+  isAdmin=false;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('adminBtn').classList.remove('active');
+  document.getElementById('adminBtn').textContent='🔑 管理';
+  document.getElementById('adminTag').classList.remove('show');
+}
+document.getElementById('loginModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogin();});
+
+// ── BUILD AREAS ──
+function allAreas(){
+  const map={};
+  BASE_AREAS.forEach(a=>{map[a.id]={...a,items:a.items.filter(i=>!S.deletedBase[i.id])}});
+  S.customAreas.forEach(ca=>{if(!map[ca.id])map[ca.id]={...ca,items:[...(ca.items||[])]}});
+  Object.keys(S.customItems).forEach(aid=>{if(!map[aid])return;S.customItems[aid].forEach(ci=>{if(!map[aid].items.find(i=>i.id===ci.id))map[aid].items.push(ci)})});
+  const order=BASE_AREAS.map(a=>a.id);
+  S.customAreas.forEach(ca=>{if(!order.includes(ca.id))order.push(ca.id)});
+  return order.map(id=>map[id]).filter(Boolean);
+}
+
+// ── RENDER ──
+function renderCard(item,areaId){
+  const s=gi(item.id);
+  const note=s.note!==''?s.note:item.note;
+  const dn=gname(item.id,item.name);
+  return `<div class="fc${s.tried?' tried':''}" id="fc_${item.id}">
+  <div class="fc-main" onclick="toggleTried('${item.id}')">
+    <div class="chk">✓</div>
+    <div class="fc-info">
+      <div class="fc-name-wrap">
+        <span class="fc-name" id="fn_${item.id}">${h(dn)}</span>
+        <input class="edit-name-inp" id="fni_${item.id}" type="text" value="${h(dn)}"
+          onclick="event.stopPropagation()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();saveItemName('${item.id}')}"
+          onblur="saveItemName('${item.id}')">
+        <button class="edit-name-icon admin-only" onclick="startEditName(event,'${item.id}')" title="修改名称">✎</button>
+      </div>
+      <div class="fc-note-short" id="ns_${item.id}"${note?'':' style="display:none"'}>${h(note)}</div>
+    </div>
+    <div class="fc-btns">
+      <button class="icon-btn" id="eb_${item.id}" onclick="toggleDet(event,'${item.id}')">▼</button>
+      <button class="del-item-btn admin-only" onclick="askDelItem(event,'${item.id}','${h(dn)}','${areaId}')">✕</button>
+    </div>
+  </div>
+  <div class="fc-detail" id="det_${item.id}">
+    <div class="dl">
+      <span class="dl-tag"><span class="tag tag-note">📝 备注</span></span>
+      <textarea class="ta-note" rows="2" placeholder="添加备注…" oninput="sf('${item.id}','note',this.value)">${h(note)}</textarea>
+    </div>
+    <div class="dl">
+      <span class="dl-tag"><span class="tag tag-cmt">💬 评论</span></span>
+      <textarea class="ta-cmt" rows="2" placeholder="添加评论…" oninput="sf('${item.id}','cmt',this.value)">${h(s.cmt||'')}</textarea>
+    </div>
+    <div class="save-hint">内容自动保存到你自己的设备上</div>
+  </div>
+</div>`;
+}
+
+function renderAddCard(areaId){
+  return `<div class="add-fc admin-only grid-item" id="afc_${areaId}">
+  <button class="add-fc-btn" onclick="showAF('${areaId}')"><span class="plus-circle">+</span>补充美食</button>
+  <div class="add-fc-form" id="aff_${areaId}">
+    <input class="add-inp" id="afn_${areaId}" placeholder="美食名称（必填）" type="text" onkeydown="if(event.key==='Enter')addFood('${areaId}')">
+    <input class="add-inp" id="afno_${areaId}" placeholder="备注（选填）" type="text" onkeydown="if(event.key==='Enter')addFood('${areaId}')">
+    <div class="btn-row">
+      <button class="btn-ok" onclick="addFood('${areaId}')">确认添加</button>
+      <button class="btn-cancel" onclick="hideAF('${areaId}')">取消</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderArea(area){
+  const tried=area.items.filter(i=>gi(i.id).tried).length;
+  const isCustom=!!S.customAreas.find(a=>a.id===area.id);
+  const dn=gname(area.id,area.name);
+  return `<div class="area" id="area_${area.id}">
+  <div class="area-hdr">
+    <span class="area-icon">${area.icon}</span>
+    <div class="area-title-wrap">
+      <span class="area-title" id="at_${area.id}">${h(dn)}</span>
+      <input class="edit-title-inp" id="ati_${area.id}" type="text" value="${h(dn)}"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();saveAreaName('${area.id}')}"
+        onblur="saveAreaName('${area.id}')">
+      <button class="edit-icon admin-only" onclick="startEditArea('${area.id}')" title="修改区域名称">✎</button>
+    </div>
+    <span class="area-stat" id="st_${area.id}">${tried} / ${area.items.length}</span>
+    ${isCustom?`<button class="del-area-btn admin-only" onclick="askDelArea('${area.id}')">删除区域</button>`:''}
+  </div>
+  <div class="food-grid" id="grid_${area.id}">
+    ${area.items.map(i=>renderCard(i,area.id)).join('')}
+    ${renderAddCard(area.id)}
+  </div>
+</div>`;
+}
+
+function renderAddAreaSection(){
+  const eb=EMOJIS.map((e,i)=>`<button class="emoji-btn${i===0?' sel':''}" onclick="selEmoji(this,'${e}')">${e}</button>`).join('');
+  return `<div class="add-area-wrap admin-only block" id="addAreaWrap">
+  <button class="add-area-trigger" onclick="showAA()"><span class="plus-circle" style="font-size:16px">+</span>新增区域</button>
+  <div class="add-area-form" id="addAreaForm">
+    <div><span class="form-label">选择图标</span><div class="emoji-grid">${eb}</div></div>
+    <div><span class="form-label">区域名称</span>
+      <input class="add-inp" id="aaName" placeholder="例如：南城片区" type="text" onkeydown="if(event.key==='Enter')addArea()">
+    </div>
+    <div class="btn-row">
+      <button class="btn-ok" onclick="addArea()">确认新增</button>
+      <button class="btn-cancel" onclick="hideAA()">取消</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function render(){
+  document.getElementById('main').innerHTML=allAreas().map(a=>renderArea(a)).join('')+renderAddAreaSection();
+  updateProg();
+}
+
+// ── INLINE EDIT (admin only) ──
+function startEditArea(aid){
+  if(!isAdmin)return;
+  const sp=document.getElementById('at_'+aid),inp=document.getElementById('ati_'+aid);
+  if(!sp||!inp)return;
+  inp.value=sp.textContent;sp.style.display='none';inp.style.display='';inp.focus();inp.select();
+}
+function saveAreaName(aid){
+  const sp=document.getElementById('at_'+aid),inp=document.getElementById('ati_'+aid);
+  if(!sp||!inp)return;
+  const v=inp.value.trim();if(v){S.names[aid]=v;save();sp.textContent=v;}
+  sp.style.display='';inp.style.display='none';
+}
+function startEditName(e,id){
+  e.stopPropagation();if(!isAdmin)return;
+  const sp=document.getElementById('fn_'+id),inp=document.getElementById('fni_'+id);
+  if(!sp||!inp)return;
+  inp.value=sp.textContent;sp.style.display='none';inp.style.display='';inp.focus();inp.select();
+}
+function saveItemName(id){
+  const sp=document.getElementById('fn_'+id),inp=document.getElementById('fni_'+id);
+  if(!sp||!inp)return;
+  const v=inp.value.trim();if(v){S.names[id]=v;save();sp.textContent=v;}
+  sp.style.display='';inp.style.display='none';
+}
+
+// ── INTERACTIONS ──
+function toggleTried(id){const s=gi(id);s.tried=!s.tried;save();const fc=document.getElementById('fc_'+id);if(fc)fc.classList.toggle('tried',s.tried);updateProg();updateStats();applyFilter();}
+function toggleDet(e,id){e.stopPropagation();const d=document.getElementById('det_'+id),b=document.getElementById('eb_'+id);if(!d||!b)return;const o=d.classList.toggle('open');b.classList.toggle('open',o);}
+function sf(id,field,val){const s=gi(id);s[field]=val;save();if(field==='note'){const n=document.getElementById('ns_'+id);if(n){n.textContent=val;n.style.display=val?'':'none';}}}
+
+// ── ADD FOOD (admin) ──
+function showAF(aid){if(!isAdmin)return;const f=document.getElementById('aff_'+aid);if(f){f.classList.add('open');document.getElementById('afn_'+aid)?.focus();}}
+function hideAF(aid){document.getElementById('aff_'+aid)?.classList.remove('open');['afn_','afno_'].forEach(p=>{const el=document.getElementById(p+aid);if(el){el.value='';el.classList.remove('err');}});}
+function addFood(aid){
+  if(!isAdmin)return;
+  const nEl=document.getElementById('afn_'+aid);const name=(nEl?.value||'').trim();
+  if(!name){nEl?.classList.add('err');nEl?.focus();return;}
+  const note=(document.getElementById('afno_'+aid)?.value||'').trim();
+  const id='c'+Date.now()+Math.random().toString(36).slice(2,5);
+  if(!S.customItems[aid])S.customItems[aid]=[];
+  const ci={id,name,note};S.customItems[aid].push(ci);
+  const ca=S.customAreas.find(a=>a.id===aid);if(ca){if(!ca.items)ca.items=[];ca.items.push(ci);}
+  save();
+  const addCard=document.getElementById('afc_'+aid);
+  if(addCard){const div=document.createElement('div');div.innerHTML=renderCard(ci,aid);addCard.parentNode.insertBefore(div.firstElementChild,addCard);}
+  hideAF(aid);updateProg();updateStats();
+}
+
+// ── ADD AREA (admin) ──
+let selEmojiVal=EMOJIS[0];
+function showAA(){if(!isAdmin)return;document.getElementById('addAreaForm')?.classList.add('open');document.getElementById('aaName')?.focus();}
+function hideAA(){document.getElementById('addAreaForm')?.classList.remove('open');const n=document.getElementById('aaName');if(n)n.value='';}
+function selEmoji(el,e){selEmojiVal=e;document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function addArea(){
+  if(!isAdmin)return;
+  const nEl=document.getElementById('aaName');const name=(nEl?.value||'').trim();if(!name){nEl?.focus();return;}
+  const id='ca'+Date.now();const area={id,name,icon:selEmojiVal,items:[]};
+  S.customAreas.push(area);save();
+  const wrap=document.getElementById('addAreaWrap');
+  const div=document.createElement('div');div.innerHTML=renderArea(area);wrap.parentNode.insertBefore(div.firstElementChild,wrap);
+  hideAA();updateProg();
+}
+
+// ── DELETE (admin) ──
+let pendingDel=null;
+function askDelItem(e,id,name,aid){if(!isAdmin)return;e.stopPropagation();pendingDel={type:'item',id,name,aid};document.getElementById('dlgMsg').textContent=`确定要删除「${name}」吗？备注和评论也会一并清除。`;document.getElementById('dlgBg').classList.add('show');}
+function askDelArea(aid){if(!isAdmin)return;const a=S.customAreas.find(x=>x.id===aid);pendingDel={type:'area',aid};document.getElementById('dlgMsg').textContent=`确定要删除「${S.names[aid]||a?.name||'该区域'}」及其所有美食条目吗？`;document.getElementById('dlgBg').classList.add('show');}
+function closeDlg(){document.getElementById('dlgBg').classList.remove('show');pendingDel=null;}
+function confirmDel(){
+  if(!pendingDel||!isAdmin){closeDlg();return;}
+  if(pendingDel.type==='item'){
+    const{id,aid}=pendingDel;
+    if(S.customItems[aid])S.customItems[aid]=S.customItems[aid].filter(i=>i.id!==id);
+    const ca=S.customAreas.find(a=>a.id===aid);if(ca&&ca.items)ca.items=ca.items.filter(i=>i.id!==id);
+    S.deletedBase[id]=true;delete S.items[id];delete S.names[id];save();
+    document.getElementById('fc_'+id)?.remove();updateProg();updateStats();
+  }else{
+    const{aid}=pendingDel;
+    S.customAreas=S.customAreas.filter(a=>a.id!==aid);delete S.customItems[aid];delete S.names[aid];save();
+    document.getElementById('area_'+aid)?.remove();updateProg();
+  }
+  closeDlg();
+}
+document.getElementById('dlgBg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDlg();});
+
+// ── FILTER & SEARCH ──
+let curF='all',curQ='';
+function setFilter(f,btn){curF=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
+function doSearch(q){curQ=q.trim().toLowerCase();applyFilter();}
+function applyFilter(){
+  const areas=allAreas();let tot=0;
+  areas.forEach(a=>{
+    let vis=0;
+    a.items.forEach(i=>{
+      const s=gi(i.id);const el=document.getElementById('fc_'+i.id);if(!el)return;
+      const dn=gname(i.id,i.name).toLowerCase();
+      const ok=(curF==='all')||(curF==='tried'&&s.tried)||(curF==='untried'&&!s.tried);
+      const qs=!curQ||dn.includes(curQ)||i.name.toLowerCase().includes(curQ);
+      el.classList.toggle('hidden',!(ok&&qs));if(ok&&qs)vis++;
+    });
+    document.getElementById('area_'+a.id)?.classList.toggle('no-vis',vis===0);tot+=vis;
+  });
+  document.getElementById('emptyMsg')?.classList.toggle('show',tot===0);
+}
+function updateProg(){
+  const areas=allAreas();const all=areas.flatMap(a=>a.items);const tried=all.filter(i=>gi(i.id).tried).length;
+  document.getElementById('pn').textContent=tried+' / '+all.length;
+  document.getElementById('pb').style.width=(all.length?tried/all.length*100:0).toFixed(1)+'%';
+}
+function updateStats(){
+  allAreas().forEach(a=>{
+    const tried=a.items.filter(i=>gi(i.id).tried).length;
+    const el=document.getElementById('st_'+a.id);if(el)el.textContent=tried+' / '+a.items.length;
+  });
+}
+
+load();render();
+</script>
+</body>
+</html>
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泸州美食打卡地图</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FBF5EE;--card:#FFFCF7;--border:#E4D4BF;--border-soft:#F0E5D6;
+  --text:#2A1708;--muted:#896D58;--hint:#BBA898;
+  --accent:#C0461F;--accent-light:#FAECE4;
+  --tried:#3D7035;
+  --cmt:#1756A0;--cmt-bg:#E6F0FB;--cmt-border:#B3CFEE;
+  --amber:#A8601A;--amber-bg:#FEF3E0;--amber-border:#ECC07A;
+  --danger:#B83215;
+  --admin:#7B3278;--admin-bg:#F5EAF4;--admin-border:#D9AEDD;
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+
+/* ── WATERMARK ── */
+.watermark{position:fixed;bottom:22px;right:22px;z-index:999;font-family:'Noto Serif SC',serif;font-size:13px;font-weight:500;color:rgba(192,70,31,.22);letter-spacing:.12em;pointer-events:none;user-select:none}
+
+/* ── HEADER ── */
+.hdr{background:var(--card);border-bottom:1.5px solid var(--border);padding:18px 24px 14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(42,23,8,.06)}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.brand h1{font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;color:var(--accent);letter-spacing:.06em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brand h1 .sub{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.06em;font-family:'Noto Sans SC',sans-serif}
+.brand p{font-size:11px;color:var(--muted);margin-top:4px}
+.prog-wrap{text-align:right}
+.prog-num{font-size:26px;font-weight:500;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.prog-label{font-size:11px;color:var(--muted);margin-top:2px}
+.prog-bar-bg{width:150px;height:5px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden;margin-left:auto}
+.prog-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.ctrl{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.fbtn{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 15px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .15s}
+.fbtn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.srch{border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;padding:5px 14px;border-radius:999px;font-family:inherit;outline:none;width:160px;transition:border-color .15s}
+.srch:focus{border-color:var(--accent)}
+.srch::placeholder{color:var(--hint)}
+
+/* ── ADMIN BADGE ── */
+.admin-btn{background:none;border:1px solid var(--admin-border);color:var(--admin);font-size:12px;padding:5px 14px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.admin-btn:hover{background:var(--admin-bg)}
+.admin-btn.active{background:var(--admin);color:#fff;border-color:var(--admin)}
+.admin-tag{display:none;background:var(--admin-bg);border:1px solid var(--admin-border);color:var(--admin);font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500;letter-spacing:.02em;align-items:center;gap:4px}
+.admin-tag.show{display:inline-flex}
+
+/* ── MAIN ── */
+.main{max-width:1000px;margin:0 auto;padding:28px 16px 120px}
+.area{margin-bottom:38px}
+.area.no-vis{display:none}
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+
+/* ── AREA HEADER ── */
+.area-hdr{display:flex;align-items:center;gap:10px;margin-bottom:13px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.area-icon{font-size:19px;line-height:1;flex-shrink:0}
+.area-title-wrap{display:flex;align-items:center;gap:5px;flex:1;min-width:0}
+.area-title{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:.04em}
+.edit-title-inp{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--text);border:none;border-bottom:2px solid var(--accent);background:transparent;outline:none;padding:0 2px;width:100%;max-width:300px;letter-spacing:.04em;display:none}
+/* admin-only UI elements hidden by default */
+.admin-only{display:none!important}
+body.admin-mode .admin-only{display:inline-flex!important}
+body.admin-mode .admin-only.block{display:flex!important}
+body.admin-mode .admin-only.grid-item{display:block!important}
+.edit-icon{font-size:12px;color:var(--hint);cursor:pointer;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;background:none;border:none;line-height:1}
+body.admin-mode .area-hdr:hover .edit-icon{opacity:1}
+body.admin-mode .fc:hover .edit-name-icon{opacity:1}
+.edit-icon:hover{color:var(--accent)}
+.area-stat{font-size:11px;color:var(--muted);background:var(--border-soft);padding:3px 11px;border-radius:999px;flex-shrink:0;margin-left:auto}
+.del-area-btn{font-size:11px;color:var(--hint);padding:3px 10px;border:1px solid var(--border);border-radius:999px;background:none;cursor:pointer;font-family:inherit;margin-left:6px;transition:all .15s;flex-shrink:0}
+.del-area-btn:hover{color:var(--danger);border-color:var(--danger)}
+
+/* ── FOOD CARD ── */
+.fc{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.fc:hover{box-shadow:0 4px 16px rgba(192,70,31,.11)}
+.fc.hidden{display:none}
+.fc-main{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 10px;cursor:pointer;user-select:none}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;margin-top:2px;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.fc.tried .chk{background:var(--tried);border-color:var(--tried);color:#fff}
+.fc-info{flex:1;min-width:0}
+.fc-name-wrap{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}
+.fc-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.45;flex:1;min-width:0}
+.fc.tried .fc-name{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--hint)}
+.edit-name-inp{font-size:14px;font-weight:500;color:var(--text);border:none;border-bottom:1.5px solid var(--accent);background:transparent;outline:none;padding:0 2px;width:100%;display:none;line-height:1.45;font-family:inherit}
+.edit-name-icon{font-size:11px;color:var(--hint);cursor:pointer;padding:1px 3px;border-radius:3px;opacity:0;transition:opacity .15s,color .15s;flex-shrink:0;background:none;border:none;line-height:1}
+.edit-name-icon:hover{color:var(--accent)}
+.fc-note-short{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
+.fc-btns{display:flex;gap:1px;align-items:flex-start;margin-top:1px;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--hint);font-size:13px;padding:2px 5px;transition:transform .2s,color .15s;line-height:1}
+.icon-btn:hover{color:var(--accent)}
+.icon-btn.open{transform:rotate(180deg);color:var(--accent)}
+.del-item-btn{background:none;border:none;cursor:pointer;color:var(--hint);font-size:13px;padding:2px 5px;line-height:1;transition:color .15s,opacity .15s;opacity:0}
+body.admin-mode .fc:hover .del-item-btn{opacity:1}
+.del-item-btn:hover{color:var(--danger)}
+
+/* ── DETAIL PANEL ── */
+.fc-detail{display:none;border-top:1px solid var(--border-soft);padding:12px 14px;background:var(--bg);gap:10px;flex-direction:column}
+.fc-detail.open{display:flex}
+.dl{display:flex;flex-direction:column;gap:5px}
+.dl-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--muted)}
+.tag{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500;letter-spacing:.02em}
+.tag-note{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.tag-cmt{background:var(--cmt-bg);color:var(--cmt);border:1px solid var(--cmt-border)}
+textarea{width:100%;font-size:12px;font-family:'Noto Sans SC',sans-serif;border-radius:7px;padding:8px 11px;resize:vertical;min-height:52px;line-height:1.65;outline:none;transition:border-color .15s}
+.ta-note{background:var(--card);border:1px solid var(--amber-border);color:var(--text)}
+.ta-note:focus{border-color:var(--amber)}
+.ta-cmt{background:var(--cmt-bg);border:1px solid var(--cmt-border);color:var(--cmt)}
+.ta-cmt:focus{border-color:var(--cmt)}
+.save-hint{font-size:10px;color:var(--hint);text-align:right}
+
+/* ── ADD FOOD CARD (admin only) ── */
+.add-fc{border:1.5px dashed var(--border);border-radius:10px;overflow:hidden;background:transparent;transition:border-color .15s,background .15s}
+.add-fc:hover{border-color:var(--accent);background:var(--accent-light)}
+.add-fc-btn{display:flex;align-items:center;gap:8px;padding:13px 14px;cursor:pointer;width:100%;background:none;border:none;font-family:inherit;color:var(--hint);font-size:13px;transition:color .15s}
+.add-fc:hover .add-fc-btn{color:var(--accent)}
+.plus-circle{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex-shrink:0}
+.add-fc-form{display:none;padding:12px 14px;border-top:1px solid var(--border-soft);background:var(--bg);gap:8px;flex-direction:column}
+.add-fc-form.open{display:flex}
+.add-inp{border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;padding:8px 12px;border-radius:7px;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+.add-inp:focus{border-color:var(--accent)}
+.add-inp::placeholder{color:var(--hint)}
+.add-inp.err{border-color:var(--danger)}
+.btn-row{display:flex;gap:8px}
+.btn-ok{background:var(--accent);border:none;color:#fff;font-size:12px;padding:7px 18px;border-radius:7px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-ok:hover{opacity:.85}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-cancel:hover{border-color:var(--muted)}
+
+/* ── ADD AREA (admin only) ── */
+.add-area-wrap{margin-bottom:36px}
+.add-area-trigger{display:flex;align-items:center;gap:10px;padding:14px 18px;border:1.5px dashed var(--border);border-radius:12px;cursor:pointer;width:100%;background:none;font-family:inherit;color:var(--hint);font-size:13px;transition:all .15s}
+.add-area-trigger:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.add-area-form{display:none;border:1.5px solid var(--border);border-radius:12px;padding:16px;background:var(--card);gap:12px;flex-direction:column}
+.add-area-form.open{display:flex}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px}
+.emoji-btn{font-size:18px;padding:6px 8px;border-radius:7px;cursor:pointer;border:1.5px solid transparent;line-height:1;transition:all .15s;background:none}
+.emoji-btn:hover{background:var(--accent-light);border-color:var(--accent)}
+.emoji-btn.sel{background:var(--accent-light);border-color:var(--accent)}
+
+/* ── ADMIN LOGIN MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(42,23,8,.45);z-index:600;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:28px 24px;max-width:340px;width:92%;text-align:center}
+.modal-icon{font-size:32px;margin-bottom:12px}
+.modal h3{font-family:'Noto Serif SC',serif;font-size:17px;color:var(--text);margin-bottom:6px}
+.modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.65}
+.pw-wrap{position:relative;margin-bottom:6px}
+.pw-inp{border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;padding:10px 40px 10px 14px;border-radius:9px;font-family:inherit;outline:none;transition:border-color .15s;width:100%;letter-spacing:.1em}
+.pw-inp:focus{border-color:var(--admin)}
+.pw-inp.err{border-color:var(--danger);animation:shake .25s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--hint);font-size:15px;line-height:1}
+.pw-err{font-size:11px;color:var(--danger);margin-bottom:12px;min-height:16px;text-align:left}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.btn-login{background:var(--admin);border:none;color:#fff;font-size:13px;padding:9px 28px;border-radius:8px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-login:hover{opacity:.85}
+.btn-close-modal{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:9px 18px;border-radius:8px;cursor:pointer;font-family:inherit}
+
+/* ── DIALOG ── */
+.dlg-bg{position:fixed;inset:0;background:rgba(42,23,8,.4);z-index:500;align-items:center;justify-content:center;display:none}
+.dlg-bg.show{display:flex}
+.dlg{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:24px 20px;max-width:320px;width:90%;text-align:center}
+.dlg h3{font-family:'Noto Serif SC',serif;font-size:16px;color:var(--text);margin-bottom:8px}
+.dlg p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:20px}
+.dlg-btns{display:flex;gap:10px;justify-content:center}
+.dlg-ok{background:var(--danger);border:none;color:#fff;font-size:13px;padding:8px 22px;border-radius:8px;cursor:pointer;font-family:inherit}
+.dlg-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit}
+
+.empty-msg{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;display:none}
+.empty-msg.show{display:block}
+
+@media(max-width:600px){
+  .food-grid{grid-template-columns:1fr}
+  .hdr{padding:14px 14px 12px}
+  .main{padding:20px 10px 100px}
+  .srch{width:120px}
+  .prog-bar-bg{width:100px}
+  body.admin-mode .del-item-btn{opacity:1}
+  body.admin-mode .edit-icon{opacity:1}
+  body.admin-mode .edit-name-icon{opacity:1}
+}
+@media print{
+  .hdr,.watermark{position:static}
+  .ctrl,.fc-btns,.add-fc,.add-area-wrap,.del-area-btn,.edit-icon,.edit-name-icon,.admin-btn,.admin-tag{display:none!important}
+  .fc-detail{display:flex!important}
+}
+</style>
+</head>
+<body>
+
+<div class="watermark">by gxt</div>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="brand">
+      <h1>泸州美食打卡地图 <span class="sub">by gxt</span></h1>
+      <p>点击卡片打卡 · 展开后可以写评论 · 数据保存在你自己的设备上</p>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-num" id="pn">0 / 0</div>
+      <div class="prog-label">已打卡</div>
+      <div class="prog-bar-bg"><div class="prog-bar" id="pb"></div></div>
+    </div>
+  </div>
+  <div class="ctrl">
+    <button class="fbtn on" onclick="setFilter('all',this)">全部</button>
+    <button class="fbtn" onclick="setFilter('tried',this)">已打卡 ✓</button>
+    <button class="fbtn" onclick="setFilter('untried',this)">未打卡</button>
+    <input class="srch" type="text" placeholder="搜索美食名称…" oninput="doSearch(this.value)">
+    <span class="admin-tag" id="adminTag">🔑 管理员模式</span>
+    <button class="admin-btn" id="adminBtn" onclick="handleAdminBtn()">🔑 管理</button>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="empty-msg" id="emptyMsg">没有找到匹配的美食 🍜</div>
+
+<!-- 管理员登录弹窗 -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <div class="modal-icon">🔑</div>
+    <h3>管理员登录</h3>
+    <p>输入密码后可新增 / 删除美食和区域，以及修改名称。<br>普通访客无需登录，可正常打卡和写评论。</p>
+    <div class="pw-wrap">
+      <input class="pw-inp" id="pwInp" type="password" placeholder="请输入管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="pw-eye" onclick="togglePw()" id="pwEye">👁</button>
+    </div>
+    <div class="pw-err" id="pwErr"></div>
+    <div class="modal-btns">
+      <button class="btn-close-modal" onclick="closeLogin()">取消</button>
+      <button class="btn-login" onclick="doLogin()">确认登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认删除弹窗 -->
+<div class="dlg-bg" id="dlgBg">
+  <div class="dlg">
+    <h3>确认删除</h3>
+    <p id="dlgMsg"></p>
+    <div class="dlg-btns">
+      <button class="dlg-cancel" onclick="closeDlg()">取消</button>
+      <button class="dlg-ok" onclick="confirmDel()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// !! 在这里修改管理员密码 !!
+const ADMIN_PASSWORD = 'gxt2024';
+// ════════════════════════════════════════
+
+const BASE_AREAS = [
+  { id:'xx', name:'肖巷子', icon:'🍡', items:[
+    { id:'xx1', name:'泸州白糕', note:'一般会点白糕，有时候点个牛肉面，吃个凉糕' },
+    { id:'xx2', name:'红桥猪儿粑', note:'带朋友去吃这三家，每样只准点一个，都是碳水，怕吃不下别的；通常点个猪儿粑' },
+    { id:'xx3', name:'豆腐脑', note:'以上三家店挨在一起；一般点原味和牛肉味，这里有浑水粑也是泸州小吃；更喜欢东门口滨江路挑担子卖的豆腐脑，感觉最代表小时候的记忆' },
+    { id:'xx4', name:'蜘蛛粑', note:'之前在面对这三家的右手方再走一段，现在不知道还开不开' },
+    { id:'xx5', name:'鲁老八串串', note:'冷串串和炸串都记到吃；冷串串喜欢酸辣，炸串喜欢辣椒面；推荐豆腐皮和豆腐鱼，豆腐鱼是用白菜卷萝卜丝做的' },
+    { id:'xx6', name:'唇齿留香', note:'炸香蕉，和鲁老八挨着；炸香蕉配番茄酱，其他炸物配辣椒面，番茄酱是老板自制的；开门佛系，有个暑假连去几次都没开' },
+    { id:'xx7', name:'佬妈蹄花', note:'白汤耙蹄花，软软糯糯，老店；唯一一个爸爸同意点外卖的东西，经常给爷爷点' },
+    { id:'xx8', name:'市府路老式凉糕 · 冰粉 · 凉虾', note:'在公交车路牌背后，夹在鸭鸭和恒源祥中间的巷子里' },
+  ]},
+  { id:'sjg', name:'水井沟摩尔旁边', icon:'🫓', items:[
+    { id:'sjg1', name:'牟记锅盔', note:'牛肉锅盔、猪肉锅盔' },
+    { id:'sjg2', name:'刘三姐烤串', note:'从路边小摊开成门店了' },
+    { id:'sjg3', name:'林黄粑', note:'可以当土特产带回去；可以煎、炸、烤；最常吃的是红糖原味' },
+    { id:'sjg4', name:'古蔺麻辣鸡', note:'可以当土特产带回去' },
+  ]},
+  { id:'zb', name:'重百美食一条街', icon:'🏪', items:[
+    { id:'zb1', name:'土豆花', note:'不是土豆坨坨！有家土豆坨坨也很火但个人觉得一般；吃土豆坨坨的话杜家街那家不错' },
+    { id:'zb2', name:'卷皮', note:'美食街进去右手边第4、5家小摊，在一家臭豆腐旁边，容易错过；喜欢点荤的酸辣' },
+    { id:'zb3', name:'软桃片', note:'软的桃片，在德克士楼下圣杰药业门口；10块钱起称，差不多十片左右' },
+    { id:'zb4', name:'鲁老大点点香', note:'和鲁老八味道差不多' },
+  ]},
+  { id:'cb', name:'城北中医院', icon:'🍜', items:[
+    { id:'cb1', name:'正宗云南烙烤', note:'金诺西门对门的街上；开了分店叫罗开心砂锅烙烤；喊老板推荐菜' },
+    { id:'cb2', name:'火焰山烧烤', note:'开了很久的烧烤店；烤乌鱼片比较有特点' },
+    { id:'cb3', name:'金诺门口一排面', note:'有竹笋牛肉面、眼镜面馆、叙永豆汤面等；米块必须吃！！豆汤要搞一哈，有干豆汤和汤的！！牛肉面很有特色！' },
+    { id:'cb4', name:'好口味麻辣鸡', note:'' },
+    { id:'cb5', name:'铺盖面', note:'在金诺西门对面；铺盖面就是那种一根面就可以遮住一个碗，很宽很大' },
+  ]},
+  { id:'kj', name:'酒城大道一段 · 空间爱晴苑 · 南阳花园附近', icon:'🌿', items:[
+    { id:'kj1', name:'彭搭搭面', note:'搭搭面' },
+    { id:'kj2', name:'三拾面馆', note:'有点小贵，但好吃；认真做面，每个面都是不同的味道和底味' },
+    { id:'kj3', name:'叙永豆汤面', note:'' },
+    { id:'kj4', name:'南阳小馆', note:'家常川菜馆子，生意很好' },
+    { id:'kj5', name:'十里香古蔺麻辣烫', note:'汤底很有特色，不是通常的红油' },
+    { id:'kj6', name:'张摊摊麻辣烫', note:'是连锁店，但个人还是挺喜欢吃' },
+    { id:'kj7', name:'罗汉小吃', note:'豆汤面，正宗叙永豆汤面，在泸州博物馆警校附近' },
+  ]},
+  { id:'yd', name:'伊顿饭店 · 麦当劳右边巷子', icon:'🥟', items:[
+    { id:'yd1', name:'左肥肠', note:'和泡菜抄手挨在一起；小时候泡菜抄手坐满了就去左肥肠点碗肥肠面，端碗泡菜抄手过来' },
+    { id:'yd2', name:'泡菜抄手', note:'蒜泥抄手' },
+  ]},
+  { id:'zzj', name:'珠子街 · 东门口 · 迎辉路', icon:'🌶️', items:[
+    { id:'zzj1', name:'臊子面', note:'东门口，老式臊子面；小时候过年才会吃上的面，很有泸州特点' },
+    { id:'zzj2', name:'王式酸辣粉', note:'一般点一个酸辣粉和一个八宝粥；八宝粥是老式的，汤和米分层，加了各种小料；小红书有相关帖子可以搜' },
+    { id:'zzj3', name:'蜀南人家', note:'家常川菜，好吃；喜欢铲铲排骨' },
+  ]},
+  { id:'gj', name:'国窖大桥 · 滨江路', icon:'🍖', items:[
+    { id:'gj1', name:'老字号锅锅宴', note:'搬家了，要搜一哈具体位置；最开始食贫道做美食视频发过，可以看看' },
+    { id:'gj2', name:'喷火龙西昌烧烤', note:'纯肉食动物，自己围着火炉烤' },
+    { id:'gj3', name:'李庄白肉', note:'要吃老店！桥下面那个' },
+  ]},
+  { id:'zgl', name:'钟鼓楼', icon:'🏮', items:[
+    { id:'zgl1', name:'饶氏豆腐鱼', note:'很薄的面皮包各种素菜，小小一个' },
+    { id:'zgl2', name:'黑糖刨冰', note:'老式刨冰，老店了' },
+  ]},
+  { id:'jyl', name:'佳裕路', icon:'☕', items:[
+    { id:'jyl1', name:'阿思寿司', note:'' },
+    { id:'jyl2', name:'猫叔咖啡', note:'' },
+    { id:'jyl3', name:'好菜馆', note:'家常川菜' },
+  ]},
+  { id:'wx', name:'万象汇 · 欢乐汇', icon:'🛍️', items:[
+    { id:'wx1', name:'翘口皮冷沾沾', note:'除了沾沾，他们的小吃也不错' },
+    { id:'wx2', name:'冯校长老火锅', note:'成都老排队的火锅，但个人觉得在泸州可以吃点别的店' },
+    { id:'wx3', name:'小郡肝钢管厂串串', note:'热锅串串，各种牛肉串' },
+    { id:'wx4', name:'佘家豆花', note:'黑豆花、白油几哈豆花' },
+    { id:'wx5', name:'李氏酱肉饼', note:'夜市摊，欢乐汇对面' },
+    { id:'wx6', name:'钟跷脚', note:'喜欢番茄锅底，牛肉汤锅' },
+    { id:'wx7', name:'蜀黄全牛宴', note:'' },
+    { id:'wx8', name:'大贰火锅', note:'可以预定窗边，记得点蛋炒饭和泡菜' },
+    { id:'wx9', name:'老邓凉糕', note:'凉虾、凉糕，有翻砂红糖；可以吃别的东西的时候带一碗' },
+    { id:'wx10', name:'江阳夜宵', note:'个人经常吃觉得还可以的烧烤；隔壁家专门做烤鱼的是烤得焦焦的那种，看个人喜好' },
+    { id:'wx11', name:'酒签巷', note:'集合了那一片店家，在这家可以下单其他家的食物，融合菜馆；豆花火锅、烧烤、锅锅宴、炒菜周边店有的这里都有' },
+  ]},
+  { id:'djj', name:'杜家街', icon:'🥔', items:[
+    { id:'djj1', name:'叙永土豆花', note:'推荐糖醋麻辣口味；土豆坨坨或狼牙土豆按个人喜好自选；他家凉面也不错' },
+    { id:'djj2', name:'健健烤串', note:'这家店对面有个甜品店，可以买个甜品去吃烧烤' },
+    { id:'djj3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来' },
+  ]},
+  { id:'smt', name:'上码头', icon:'⚓', items:[
+    { id:'smt1', name:'清真异味轩牛肉馆', note:'牛肉面' },
+    { id:'smt2', name:'罗氏面庄', note:'干杂面' },
+    { id:'smt3', name:'特色干杂面', note:'干杂面' },
+  ]},
+  { id:'xmj', name:'新民街', icon:'🍥', items:[
+    { id:'xmj1', name:'晓林臊子面', note:'老式臊子面' },
+  ]},
+  { id:'lh', name:'泸州高中', icon:'🏫', items:[
+    { id:'lh1', name:'风口面', note:'干豆汤面、牛肉面、豇豆面' },
+    { id:'lh2', name:'万顺砂锅米线', note:'三鲜米线、烫饭、炸串' },
+    { id:'lh3', name:'冒菜店', note:'后门巷子里的冒菜店' },
+  ]},
+  { id:'hg', name:'火锅', icon:'🍲', items:[
+    { id:'hg1', name:'黑豆花火锅', note:'张坝桂圆林门口' },
+    { id:'hg2', name:'钟跷脚', note:'选番茄锅底，牛肉汤锅' },
+    { id:'hg3', name:'蜀黄全牛宴', note:'很嫩的牛肉，连锁店' },
+    { id:'hg4', name:'大贰火锅', note:'可以预定窗边，风景不错；记得点蛋炒饭和泡菜' },
+    { id:'hg5', name:'麻辣空间', note:'泸州本地品牌，有很多家店；清油火锅，这个肯定要吃一顿；大锅一起吃，个别店有小锅一人一个' },
+  ]},
+  { id:'dh', name:'豆花店', icon:'🫘', items:[
+    { id:'dh1', name:'石磨豆花（醇香路店）', note:'点个白水豆花，配些家常炒菜' },
+    { id:'dh2', name:'紫檀阁（瑞丰公馆店）', note:'合江豆花，菜品种类少但经典；少有的打调料地方有绍子；老板装修很顶，有檀木展览' },
+    { id:'dh3', name:'佘家豆花（瑞丰公馆店）', note:'地点在万象汇附近；家常菜味道也不错；白水豆花、鸡哈豆花' },
+  ]},
+  { id:'nd', name:'面馆', icon:'🍝', items:[
+    { id:'nd1', name:'酱子酸菜面', note:'这家面可以双拼！味道也好' },
+    { id:'nd2', name:'罗汉小吃', note:'豆汤面，正宗叙永豆汤面，在泸州博物馆警校附近' },
+    { id:'nd3', name:'李记绍子面', note:'枫林街；臊子和绍子是不同的' },
+    { id:'nd4', name:'臊子面', note:'东门口，老式臊子面；小时候过年才会吃上的面，很有泸州特点' },
+    { id:'nd5', name:'晓林臊子面', note:'新民街，老式臊子面' },
+    { id:'nd6', name:'风口面', note:'干豆汤面、牛肉面、豇豆面' },
+    { id:'nd7', name:'叙永豆汤面', note:'' },
+  ]},
+  { id:'yg', name:'鱼馆', icon:'🐟', items:[
+    { id:'yg1', name:'雅名轩生态鱼府', note:'' },
+    { id:'yg2', name:'渔舟渡精品鱼餐', note:'' },
+    { id:'yg3', name:'老院子无刺鲫鱼（菁华美领居）', note:'喜欢干烧的；干烧加改刀刺基本上吃不出来' },
+    { id:'yg4', name:'三三鱼馆', note:'' },
+  ]},
+  { id:'qt', name:'其他', icon:'📍', items:[
+    { id:'qt1', name:'建工兔 / 建工别院', note:'很有特色的兔子！！让我爱上了兔子' },
+  ]},
+];
+
+const EMOJIS=['🍜','🍲','🥢','🍡','🥟','🍖','🫓','🌶️','🍣','☕','🛍️','🏫','🍝','🫘','📍','🌿','🏪','🍱','🎯','🌟','🍤','🫕','🥘','🍛','🍢','🐟','🏮','⚓','🥔','🍥'];
+
+const SK='lz_v5';
+let S={items:{},names:{},customItems:{},customAreas:[],deletedBase:{}};
+let isAdmin=false;
+
+function load(){try{S=JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){}S.items=S.items||{};S.names=S.names||{};S.customItems=S.customItems||{};S.customAreas=S.customAreas||[];S.deletedBase=S.deletedBase||{}}
+function save(){localStorage.setItem(SK,JSON.stringify(S))}
+function gi(id){if(!S.items[id])S.items[id]={tried:false,note:'',cmt:''};return S.items[id]}
+function gname(id,fb){return S.names[id]!==undefined?S.names[id]:fb}
+function h(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ── ADMIN AUTH ──
+function handleAdminBtn(){
+  if(isAdmin){logoutAdmin();}else{openLogin();}
+}
+function openLogin(){
+  document.getElementById('pwInp').value='';
+  document.getElementById('pwErr').textContent='';
+  document.getElementById('loginModal').classList.add('show');
+  setTimeout(()=>document.getElementById('pwInp').focus(),100);
+}
+function closeLogin(){document.getElementById('loginModal').classList.remove('show');}
+function togglePw(){
+  const inp=document.getElementById('pwInp');
+  const eye=document.getElementById('pwEye');
+  if(inp.type==='password'){inp.type='text';eye.textContent='🙈';}
+  else{inp.type='password';eye.textContent='👁';}
+}
+function doLogin(){
+  const val=document.getElementById('pwInp').value;
+  const inp=document.getElementById('pwInp');
+  const err=document.getElementById('pwErr');
+  if(val===ADMIN_PASSWORD){
+    isAdmin=true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('adminBtn').classList.add('active');
+    document.getElementById('adminBtn').textContent='🔓 退出管理';
+    document.getElementById('adminTag').classList.add('show');
+    closeLogin();
+  }else{
+    inp.classList.add('err');
+    err.textContent='密码不正确，请重试';
+    inp.value='';
+    inp.focus();
+    setTimeout(()=>inp.classList.remove('err'),600);
+  }
+}
+function logoutAdmin(){
+  isAdmin=false;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('adminBtn').classList.remove('active');
+  document.getElementById('adminBtn').textContent='🔑 管理';
+  document.getElementById('adminTag').classList.remove('show');
+}
+document.getElementById('loginModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogin();});
+
+// ── BUILD AREAS ──
+function allAreas(){
+  const map={};
+  BASE_AREAS.forEach(a=>{map[a.id]={...a,items:a.items.filter(i=>!S.deletedBase[i.id])}});
+  S.customAreas.forEach(ca=>{if(!map[ca.id])map[ca.id]={...ca,items:[...(ca.items||[])]}});
+  Object.keys(S.customItems).forEach(aid=>{if(!map[aid])return;S.customItems[aid].forEach(ci=>{if(!map[aid].items.find(i=>i.id===ci.id))map[aid].items.push(ci)})});
+  const order=BASE_AREAS.map(a=>a.id);
+  S.customAreas.forEach(ca=>{if(!order.includes(ca.id))order.push(ca.id)});
+  return order.map(id=>map[id]).filter(Boolean);
+}
+
+// ── RENDER ──
+function renderCard(item,areaId){
+  const s=gi(item.id);
+  const note=s.note!==''?s.note:item.note;
+  const dn=gname(item.id,item.name);
+  return `<div class="fc${s.tried?' tried':''}" id="fc_${item.id}">
+  <div class="fc-main" onclick="toggleTried('${item.id}')">
+    <div class="chk">✓</div>
+    <div class="fc-info">
+      <div class="fc-name-wrap">
+        <span class="fc-name" id="fn_${item.id}">${h(dn)}</span>
+        <input class="edit-name-inp" id="fni_${item.id}" type="text" value="${h(dn)}"
+          onclick="event.stopPropagation()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();saveItemName('${item.id}')}"
+          onblur="saveItemName('${item.id}')">
+        <button class="edit-name-icon admin-only" onclick="startEditName(event,'${item.id}')" title="修改名称">✎</button>
+      </div>
+      <div class="fc-note-short" id="ns_${item.id}"${note?'':' style="display:none"'}>${h(note)}</div>
+    </div>
+    <div class="fc-btns">
+      <button class="icon-btn" id="eb_${item.id}" onclick="toggleDet(event,'${item.id}')">▼</button>
+      <button class="del-item-btn admin-only" onclick="askDelItem(event,'${item.id}','${h(dn)}','${areaId}')">✕</button>
+    </div>
+  </div>
+  <div class="fc-detail" id="det_${item.id}">
+    <div class="dl">
+      <span class="dl-tag"><span class="tag tag-note">📝 备注</span></span>
+      <textarea class="ta-note" rows="2" placeholder="添加备注…" oninput="sf('${item.id}','note',this.value)">${h(note)}</textarea>
+    </div>
+    <div class="dl">
+      <span class="dl-tag"><span class="tag tag-cmt">💬 评论</span></span>
+      <textarea class="ta-cmt" rows="2" placeholder="添加评论…" oninput="sf('${item.id}','cmt',this.value)">${h(s.cmt||'')}</textarea>
+    </div>
+    <div class="save-hint">内容自动保存到你自己的设备上</div>
+  </div>
+</div>`;
+}
+
+function renderAddCard(areaId){
+  return `<div class="add-fc admin-only grid-item" id="afc_${areaId}">
+  <button class="add-fc-btn" onclick="showAF('${areaId}')"><span class="plus-circle">+</span>补充美食</button>
+  <div class="add-fc-form" id="aff_${areaId}">
+    <input class="add-inp" id="afn_${areaId}" placeholder="美食名称（必填）" type="text" onkeydown="if(event.key==='Enter')addFood('${areaId}')">
+    <input class="add-inp" id="afno_${areaId}" placeholder="备注（选填）" type="text" onkeydown="if(event.key==='Enter')addFood('${areaId}')">
+    <div class="btn-row">
+      <button class="btn-ok" onclick="addFood('${areaId}')">确认添加</button>
+      <button class="btn-cancel" onclick="hideAF('${areaId}')">取消</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderArea(area){
+  const tried=area.items.filter(i=>gi(i.id).tried).length;
+  const isCustom=!!S.customAreas.find(a=>a.id===area.id);
+  const dn=gname(area.id,area.name);
+  return `<div class="area" id="area_${area.id}">
+  <div class="area-hdr">
+    <span class="area-icon">${area.icon}</span>
+    <div class="area-title-wrap">
+      <span class="area-title" id="at_${area.id}">${h(dn)}</span>
+      <input class="edit-title-inp" id="ati_${area.id}" type="text" value="${h(dn)}"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();saveAreaName('${area.id}')}"
+        onblur="saveAreaName('${area.id}')">
+      <button class="edit-icon admin-only" onclick="startEditArea('${area.id}')" title="修改区域名称">✎</button>
+    </div>
+    <span class="area-stat" id="st_${area.id}">${tried} / ${area.items.length}</span>
+    ${isCustom?`<button class="del-area-btn admin-only" onclick="askDelArea('${area.id}')">删除区域</button>`:''}
+  </div>
+  <div class="food-grid" id="grid_${area.id}">
+    ${area.items.map(i=>renderCard(i,area.id)).join('')}
+    ${renderAddCard(area.id)}
+  </div>
+</div>`;
+}
+
+function renderAddAreaSection(){
+  const eb=EMOJIS.map((e,i)=>`<button class="emoji-btn${i===0?' sel':''}" onclick="selEmoji(this,'${e}')">${e}</button>`).join('');
+  return `<div class="add-area-wrap admin-only block" id="addAreaWrap">
+  <button class="add-area-trigger" onclick="showAA()"><span class="plus-circle" style="font-size:16px">+</span>新增区域</button>
+  <div class="add-area-form" id="addAreaForm">
+    <div><span class="form-label">选择图标</span><div class="emoji-grid">${eb}</div></div>
+    <div><span class="form-label">区域名称</span>
+      <input class="add-inp" id="aaName" placeholder="例如：南城片区" type="text" onkeydown="if(event.key==='Enter')addArea()">
+    </div>
+    <div class="btn-row">
+      <button class="btn-ok" onclick="addArea()">确认新增</button>
+      <button class="btn-cancel" onclick="hideAA()">取消</button>
+    </div>
+  </div>
+</div>`;
+}
+
+function render(){
+  document.getElementById('main').innerHTML=allAreas().map(a=>renderArea(a)).join('')+renderAddAreaSection();
+  updateProg();
+}
+
+// ── INLINE EDIT (admin only) ──
+function startEditArea(aid){
+  if(!isAdmin)return;
+  const sp=document.getElementById('at_'+aid),inp=document.getElementById('ati_'+aid);
+  if(!sp||!inp)return;
+  inp.value=sp.textContent;sp.style.display='none';inp.style.display='';inp.focus();inp.select();
+}
+function saveAreaName(aid){
+  const sp=document.getElementById('at_'+aid),inp=document.getElementById('ati_'+aid);
+  if(!sp||!inp)return;
+  const v=inp.value.trim();if(v){S.names[aid]=v;save();sp.textContent=v;}
+  sp.style.display='';inp.style.display='none';
+}
+function startEditName(e,id){
+  e.stopPropagation();if(!isAdmin)return;
+  const sp=document.getElementById('fn_'+id),inp=document.getElementById('fni_'+id);
+  if(!sp||!inp)return;
+  inp.value=sp.textContent;sp.style.display='none';inp.style.display='';inp.focus();inp.select();
+}
+function saveItemName(id){
+  const sp=document.getElementById('fn_'+id),inp=document.getElementById('fni_'+id);
+  if(!sp||!inp)return;
+  const v=inp.value.trim();if(v){S.names[id]=v;save();sp.textContent=v;}
+  sp.style.display='';inp.style.display='none';
+}
+
+// ── INTERACTIONS ──
+function toggleTried(id){const s=gi(id);s.tried=!s.tried;save();const fc=document.getElementById('fc_'+id);if(fc)fc.classList.toggle('tried',s.tried);updateProg();updateStats();applyFilter();}
+function toggleDet(e,id){e.stopPropagation();const d=document.getElementById('det_'+id),b=document.getElementById('eb_'+id);if(!d||!b)return;const o=d.classList.toggle('open');b.classList.toggle('open',o);}
+function sf(id,field,val){const s=gi(id);s[field]=val;save();if(field==='note'){const n=document.getElementById('ns_'+id);if(n){n.textContent=val;n.style.display=val?'':'none';}}}
+
+// ── ADD FOOD (admin) ──
+function showAF(aid){if(!isAdmin)return;const f=document.getElementById('aff_'+aid);if(f){f.classList.add('open');document.getElementById('afn_'+aid)?.focus();}}
+function hideAF(aid){document.getElementById('aff_'+aid)?.classList.remove('open');['afn_','afno_'].forEach(p=>{const el=document.getElementById(p+aid);if(el){el.value='';el.classList.remove('err');}});}
+function addFood(aid){
+  if(!isAdmin)return;
+  const nEl=document.getElementById('afn_'+aid);const name=(nEl?.value||'').trim();
+  if(!name){nEl?.classList.add('err');nEl?.focus();return;}
+  const note=(document.getElementById('afno_'+aid)?.value||'').trim();
+  const id='c'+Date.now()+Math.random().toString(36).slice(2,5);
+  if(!S.customItems[aid])S.customItems[aid]=[];
+  const ci={id,name,note};S.customItems[aid].push(ci);
+  const ca=S.customAreas.find(a=>a.id===aid);if(ca){if(!ca.items)ca.items=[];ca.items.push(ci);}
+  save();
+  const addCard=document.getElementById('afc_'+aid);
+  if(addCard){const div=document.createElement('div');div.innerHTML=renderCard(ci,aid);addCard.parentNode.insertBefore(div.firstElementChild,addCard);}
+  hideAF(aid);updateProg();updateStats();
+}
+
+// ── ADD AREA (admin) ──
+let selEmojiVal=EMOJIS[0];
+function showAA(){if(!isAdmin)return;document.getElementById('addAreaForm')?.classList.add('open');document.getElementById('aaName')?.focus();}
+function hideAA(){document.getElementById('addAreaForm')?.classList.remove('open');const n=document.getElementById('aaName');if(n)n.value='';}
+function selEmoji(el,e){selEmojiVal=e;document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function addArea(){
+  if(!isAdmin)return;
+  const nEl=document.getElementById('aaName');const name=(nEl?.value||'').trim();if(!name){nEl?.focus();return;}
+  const id='ca'+Date.now();const area={id,name,icon:selEmojiVal,items:[]};
+  S.customAreas.push(area);save();
+  const wrap=document.getElementById('addAreaWrap');
+  const div=document.createElement('div');div.innerHTML=renderArea(area);wrap.parentNode.insertBefore(div.firstElementChild,wrap);
+  hideAA();updateProg();
+}
+
+// ── DELETE (admin) ──
+let pendingDel=null;
+function askDelItem(e,id,name,aid){if(!isAdmin)return;e.stopPropagation();pendingDel={type:'item',id,name,aid};document.getElementById('dlgMsg').textContent=`确定要删除「${name}」吗？备注和评论也会一并清除。`;document.getElementById('dlgBg').classList.add('show');}
+function askDelArea(aid){if(!isAdmin)return;const a=S.customAreas.find(x=>x.id===aid);pendingDel={type:'area',aid};document.getElementById('dlgMsg').textContent=`确定要删除「${S.names[aid]||a?.name||'该区域'}」及其所有美食条目吗？`;document.getElementById('dlgBg').classList.add('show');}
+function closeDlg(){document.getElementById('dlgBg').classList.remove('show');pendingDel=null;}
+function confirmDel(){
+  if(!pendingDel||!isAdmin){closeDlg();return;}
+  if(pendingDel.type==='item'){
+    const{id,aid}=pendingDel;
+    if(S.customItems[aid])S.customItems[aid]=S.customItems[aid].filter(i=>i.id!==id);
+    const ca=S.customAreas.find(a=>a.id===aid);if(ca&&ca.items)ca.items=ca.items.filter(i=>i.id!==id);
+    S.deletedBase[id]=true;delete S.items[id];delete S.names[id];save();
+    document.getElementById('fc_'+id)?.remove();updateProg();updateStats();
+  }else{
+    const{aid}=pendingDel;
+    S.customAreas=S.customAreas.filter(a=>a.id!==aid);delete S.customItems[aid];delete S.names[aid];save();
+    document.getElementById('area_'+aid)?.remove();updateProg();
+  }
+  closeDlg();
+}
+document.getElementById('dlgBg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDlg();});
+
+// ── FILTER & SEARCH ──
+let curF='all',curQ='';
+function setFilter(f,btn){curF=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');applyFilter();}
+function doSearch(q){curQ=q.trim().toLowerCase();applyFilter();}
+function applyFilter(){
+  const areas=allAreas();let tot=0;
+  areas.forEach(a=>{
+    let vis=0;
+    a.items.forEach(i=>{
+      const s=gi(i.id);const el=document.getElementById('fc_'+i.id);if(!el)return;
+      const dn=gname(i.id,i.name).toLowerCase();
+      const ok=(curF==='all')||(curF==='tried'&&s.tried)||(curF==='untried'&&!s.tried);
+      const qs=!curQ||dn.includes(curQ)||i.name.toLowerCase().includes(curQ);
+      el.classList.toggle('hidden',!(ok&&qs));if(ok&&qs)vis++;
+    });
+    document.getElementById('area_'+a.id)?.classList.toggle('no-vis',vis===0);tot+=vis;
+  });
+  document.getElementById('emptyMsg')?.classList.toggle('show',tot===0);
+}
+function updateProg(){
+  const areas=allAreas();const all=areas.flatMap(a=>a.items);const tried=all.filter(i=>gi(i.id).tried).length;
+  document.getElementById('pn').textContent=tried+' / '+all.length;
+  document.getElementById('pb').style.width=(all.length?tried/all.length*100:0).toFixed(1)+'%';
+}
+function updateStats(){
+  allAreas().forEach(a=>{
+    const tried=a.items.filter(i=>gi(i.id).tried).length;
+    const el=document.getElementById('st_'+a.id);if(el)el.textContent=tried+' / '+a.items.length;
+  });
+}
+
+load();render();
+</script>
+</body>
+</html>
+
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#FBF5EE;--card:#FFFCF7;--border:#E4D4BF;--border-soft:#F0E5D6;
